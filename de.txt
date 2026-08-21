@@ -1,0 +1,427 @@
+import sys
+
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QFrame,
+    QSpacerItem,
+    QSizePolicy,
+)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
+
+
+class InsaatTakip(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("İnşaat Takip Sistemi")
+        self.resize(1280, 760)
+
+        self.arayuzu_olustur()
+        self.stil_uygula()
+
+    # ==========================================
+    # ARAYÜZ
+    # ==========================================
+
+    def arayuzu_olustur(self):
+
+        ana_widget = QWidget()
+        self.setCentralWidget(ana_widget)
+
+        ana_layout = QHBoxLayout(ana_widget)
+        ana_layout.setContentsMargins(0, 0, 0, 0)
+        ana_layout.setSpacing(0)
+
+        # ======================================
+        # SOL MENÜ
+        # ======================================
+
+        menu = QFrame()
+        menu.setObjectName("menu")
+        menu.setFixedWidth(240)
+
+        menu_layout = QVBoxLayout(menu)
+        menu_layout.setContentsMargins(20, 25, 20, 20)
+        menu_layout.setSpacing(10)
+
+        # Logo / başlık
+
+        logo = QLabel("🏗  İNŞAAT\n    TAKİP")
+        logo.setObjectName("logo")
+
+        menu_layout.addWidget(logo)
+
+        menu_layout.addSpacing(30)
+
+        # Menü butonları
+
+        self.btn_ana = QPushButton("⌂   Ana Sayfa")
+        self.btn_kamera = QPushButton("◉   Kamera")
+        self.btn_takvim = QPushButton("□   Takvim")
+        self.btn_galeri = QPushButton("▣   Galeri")
+        self.btn_timelapse = QPushButton("▶   Time-lapse")
+
+        self.menu_butonlari = [
+            self.btn_ana,
+            self.btn_kamera,
+            self.btn_takvim,
+            self.btn_galeri,
+            self.btn_timelapse,
+        ]
+
+        for buton in self.menu_butonlari:
+            buton.setMinimumHeight(48)
+            menu_layout.addWidget(buton)
+
+        menu_layout.addItem(
+            QSpacerItem(
+                20,
+                40,
+                QSizePolicy.Policy.Minimum,
+                QSizePolicy.Policy.Expanding,
+            )
+        )
+
+        # Ayarlar
+
+        self.btn_ayarlar = QPushButton("⚙   Ayarlar")
+        self.btn_ayarlar.setMinimumHeight(48)
+
+        menu_layout.addWidget(self.btn_ayarlar)
+
+        # ======================================
+        # SAĞ ANA ALAN
+        # ======================================
+
+        sag = QWidget()
+        sag_layout = QVBoxLayout(sag)
+
+        sag_layout.setContentsMargins(35, 30, 35, 25)
+        sag_layout.setSpacing(20)
+
+        # ======================================
+        # ÜST BAŞLIK
+        # ======================================
+
+        ust = QHBoxLayout()
+
+        baslik_layout = QVBoxLayout()
+
+        baslik = QLabel("İnşaat Projesi")
+        baslik.setObjectName("baslik")
+
+        alt_baslik = QLabel("Proje durumunu ve kamera kayıtlarını takip edin.")
+        alt_baslik.setObjectName("alt_baslik")
+
+        baslik_layout.addWidget(baslik)
+        baslik_layout.addWidget(alt_baslik)
+
+        ust.addLayout(baslik_layout)
+
+        ust.addItem(
+            QSpacerItem(
+                40,
+                20,
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Minimum,
+            )
+        )
+
+        durum = QLabel("●  Sistem Hazır")
+        durum.setObjectName("durum")
+
+        ust.addWidget(durum)
+
+        sag_layout.addLayout(ust)
+
+        # ======================================
+        # İSTATİSTİK KARTLARI
+        # ======================================
+
+        kart_layout = QHBoxLayout()
+        kart_layout.setSpacing(15)
+
+        kart1 = self.kart_olustur(
+            "TOPLAM GÖRÜNTÜ",
+            "0",
+            "📷",
+        )
+
+        kart2 = self.kart_olustur(
+            "SON ÇEKİM",
+            "--",
+            "◷",
+        )
+
+        kart3 = self.kart_olustur(
+            "TIME-LAPSE",
+            "0",
+            "▶",
+        )
+
+        kart_layout.addWidget(kart1)
+        kart_layout.addWidget(kart2)
+        kart_layout.addWidget(kart3)
+
+        sag_layout.addLayout(kart_layout)
+
+        # ======================================
+        # SON GÖRÜNTÜ
+        # ======================================
+
+        goruntu_karti = QFrame()
+        goruntu_karti.setObjectName("kart")
+
+        goruntu_layout = QVBoxLayout(goruntu_karti)
+
+        baslik2 = QLabel("Son Görüntü")
+        baslik2.setObjectName("kart_baslik")
+
+        goruntu_layout.addWidget(baslik2)
+
+        # Kamera görüntüsü için alan
+
+        kamera_alani = QLabel("📷\n\nHenüz görüntü alınmadı")
+        kamera_alani.setObjectName("kamera_alani")
+        kamera_alani.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        kamera_alani.setMinimumHeight(280)
+
+        goruntu_layout.addWidget(kamera_alani)
+
+        # ======================================
+        # ALT BİLGİ
+        # ======================================
+
+        alt = QHBoxLayout()
+
+        son_cekim = QLabel("Son çekim: --")
+        son_cekim.setObjectName("bilgi")
+
+        alt.addWidget(son_cekim)
+
+        alt.addItem(
+            QSpacerItem(
+                20,
+                20,
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Minimum,
+            )
+        )
+
+        foto_cek = QPushButton("📷  Şimdi Fotoğraf Çek")
+        foto_cek.setObjectName("ana_buton")
+        foto_cek.setMinimumHeight(42)
+
+        alt.addWidget(foto_cek)
+
+        goruntu_layout.addLayout(alt)
+
+        sag_layout.addWidget(goruntu_karti)
+
+        # ======================================
+        # ALT DURUM
+        # ======================================
+
+        footer = QLabel(
+            "Kamera bağlantısı bekleniyor  •  "
+            "Otomatik çekim: Pasif"
+        )
+
+        footer.setObjectName("footer")
+
+        sag_layout.addWidget(footer)
+
+        ana_layout.addWidget(menu)
+        ana_layout.addWidget(sag)
+
+    # ==========================================
+    # KART OLUŞTUR
+    # ==========================================
+
+    def kart_olustur(self, baslik, deger, ikon):
+
+        kart = QFrame()
+        kart.setObjectName("istatistik_kart")
+
+        layout = QHBoxLayout(kart)
+        layout.setContentsMargins(18, 15, 18, 15)
+
+        ikon_label = QLabel(ikon)
+        ikon_label.setObjectName("ikon")
+
+        bilgiler = QVBoxLayout()
+
+        baslik_label = QLabel(baslik)
+        baslik_label.setObjectName("istatistik_baslik")
+
+        deger_label = QLabel(deger)
+        deger_label.setObjectName("istatistik_deger")
+
+        bilgiler.addWidget(baslik_label)
+        bilgiler.addWidget(deger_label)
+
+        layout.addWidget(ikon_label)
+        layout.addLayout(bilgiler)
+
+        return kart
+
+    # ==========================================
+    # TASARIM
+    # ==========================================
+
+    def stil_uygula(self):
+
+        self.setStyleSheet("""
+        
+        QMainWindow {
+            background-color: #101418;
+        }
+
+        QWidget {
+            font-family: "Segoe UI";
+        }
+
+        #menu {
+            background-color: #171c21;
+            border-right: 1px solid #252c33;
+        }
+
+        #logo {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        QPushButton {
+            background-color: transparent;
+            color: #aeb7c2;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            padding-left: 15px;
+            font-size: 14px;
+        }
+
+        QPushButton:hover {
+            background-color: #222a31;
+            color: #ffffff;
+        }
+
+        QPushButton:pressed {
+            background-color: #2c353d;
+        }
+
+        #baslik {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #alt_baslik {
+            color: #7f8a96;
+            font-size: 13px;
+        }
+
+        #durum {
+            color: #6fcf97;
+            background-color: #17251e;
+            border-radius: 15px;
+            padding: 8px 14px;
+            font-size: 12px;
+        }
+
+        #istatistik_kart {
+            background-color: #171c21;
+            border: 1px solid #252c33;
+            border-radius: 12px;
+            min-height: 80px;
+        }
+
+        #ikon {
+            font-size: 25px;
+            padding-right: 8px;
+        }
+
+        #istatistik_baslik {
+            color: #7f8a96;
+            font-size: 11px;
+        }
+
+        #istatistik_deger {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #kart {
+            background-color: #171c21;
+            border: 1px solid #252c33;
+            border-radius: 12px;
+        }
+
+        #kart_baslik {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #kamera_alani {
+            background-color: #0d1115;
+            border: 1px dashed #343d46;
+            border-radius: 8px;
+            color: #66717d;
+            font-size: 14px;
+        }
+
+        #bilgi {
+            color: #7f8a96;
+            font-size: 12px;
+        }
+
+        #ana_buton {
+            background-color: #2f80ed;
+            color: white;
+            text-align: center;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        #ana_buton:hover {
+            background-color: #4a91ef;
+        }
+
+        #footer {
+            color: #65717d;
+            font-size: 11px;
+            padding-top: 3px;
+        }
+
+        """)
+
+
+# ==========================================
+# PROGRAMI BAŞLAT
+# ==========================================
+
+def main():
+
+    app = QApplication(sys.argv)
+
+    pencere = InsaatTakip()
+    pencere.show()
+
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
