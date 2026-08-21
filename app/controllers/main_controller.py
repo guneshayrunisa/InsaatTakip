@@ -2,12 +2,9 @@ from PySide6.QtCore import QTimer
 
 from app.services.timelapse_service import TimelapseService
 from app.services.camera_manager import CameraManager
-import json
-from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox
 
-from app.services.camera_health_service import CameraHealthService
 
 class MainController:
 
@@ -20,20 +17,13 @@ class MainController:
 
         self.model = model
         self.view = view
-        
-        # Eski camera service referansı
+
+        # ==================================================
+        # ESKİ CAMERA SERVICE REFERANSI
+        # ==================================================
+
         self.camera_service = camera_service
-        # ==================================================
-        # KAMERA SAĞLIK ANALİZİ
-        # ==================================================
 
-        self.camera_health_service = (
-            CameraHealthService()
-        )
-
-        self.camera_reference = None
-
-        self.load_camera_reference()
         # ==================================================
         # CAMERA MANAGER
         # ==================================================
@@ -199,57 +189,14 @@ class MainController:
             last_capture=self.model.last_capture,
             timelapse_count=self.model.timelapse_count,
         )
+
         self.view.gallery_view.load_images()
 
         # Uygulama açılırken son fotoğrafı göster
         if self.model.last_image_path:
+
             self.view.home_view.update_image(
                 self.model.last_image_path
-            )
-
-    # ==================================================
-    # KAMERA REFERANSINI YÜKLE
-    # ==================================================
-
-    def load_camera_reference(self):
-
-        reference_path = (
-            Path(__file__).resolve().parents[2]
-            / "data"
-            / "camera_references"
-            / "camera_0_reference.json"
-        )
-
-        if not reference_path.exists():
-
-            print(
-                "Kamera 0 referans dosyası bulunamadı."
-            )
-
-            return
-
-        try:
-
-            with open(
-                reference_path,
-                "r",
-                encoding="utf-8"
-            ) as file:
-
-                self.camera_reference = (
-                    json.load(file)
-                )
-
-            print(
-                "Kamera 0 referansı yüklendi."
-            )
-
-        except Exception as error:
-
-            self.camera_reference = None
-
-            print(
-                f"Kamera referansı yüklenemedi: {error}"
             )
 
     # ==================================================
@@ -326,62 +273,7 @@ class MainController:
             )
 
             return
-        # ==================================================
-        # KAMERA SAĞLIK ANALİZİ
-        # ==================================================
 
-        image_path = result["path"]
-
-        health_result = (
-            self.camera_health_service.analyze(
-                image_path
-            )
-        )
-
-        reference_result = None
-
-        if self.camera_reference is not None:
-
-            reference_result = (
-                self.camera_health_service
-                .compare_with_regional_reference(
-                    image_path,
-                    self.camera_reference
-                )
-            )
-        # ==================================================
-        # KAMERA UYARISI
-        # ==================================================
-
-        warning_message = None
-
-        if not health_result["ok"]:
-
-            warning_message = (
-                health_result["message"]
-            )
-
-        elif (
-            reference_result is not None
-            and not reference_result["ok"]
-        ):
-
-            warning_message = (
-                reference_result["message"]
-            )
-
-        if warning_message:
-
-            print(
-                f"KAMERA UYARISI: "
-                f"{warning_message}"
-            )
-
-            QMessageBox.warning(
-                self.view,
-                "Kamera Uyarısı",
-                warning_message
-            )
         # ==================================================
         # TARİH
         # ==================================================

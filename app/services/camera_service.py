@@ -1,8 +1,17 @@
 from pathlib import Path
 from datetime import datetime
 from time import sleep
+import platform
 
-from picamera2 import Picamera2
+
+# ==================================================
+# RASPBERRY PI KAMERA DESTEĞİ
+# ==================================================
+
+if platform.system() == "Linux":
+    from picamera2 import Picamera2
+else:
+    Picamera2 = None
 
 
 class CameraService:
@@ -49,7 +58,10 @@ class CameraService:
 
         self.connected = False
 
-        # Kamerayı başlat
+        # ==================================================
+        # KAMERAYI BAŞLAT
+        # ==================================================
+
         self.initialize_camera()
 
     # ==================================================
@@ -57,6 +69,27 @@ class CameraService:
     # ==================================================
 
     def initialize_camera(self):
+
+        # ==================================================
+        # WINDOWS / RASPBERRY PI DIŞI SİSTEM
+        # ==================================================
+
+        if Picamera2 is None:
+
+            print(
+                f"Kamera {self.camera_id}: "
+                "Raspberry Pi kamerası bu sistemde "
+                "kullanılamıyor."
+            )
+
+            self.camera = None
+            self.connected = False
+
+            return
+
+        # ==================================================
+        # RASPBERRY PI KAMERASI
+        # ==================================================
 
         try:
 
