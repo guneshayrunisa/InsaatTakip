@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>İnşaat Takip - Admin Panel</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            🏗️
+            <span>İNŞAAT<br>TAKİP</span>
+        </div>
+
+        <nav>
+
+            <a class="active">
+                🏠
+                <span>Dashboard</span>
+            </a>
+
+            <a>
+                📷
+                <span>Kameralar</span>
+            </a>
+
+            <a>
+                🖼️
+                <span>Galerı</span>
+            </a>
+
+            <a>
+                🎞️
+                <span>Time-lapse</span>
+            </a>
+
+            <a>
+                📅
+                <span>Takvim</span>
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ANA ALAN -->
+
+    <main class="main">
+
+        <header>
+
+            <div>
+                <h1>Dashboard</h1>
+
+                <p>
+                    İnşaat takip sisteminin genel durumu
+                </p>
+            </div>
+
+            <div class="system-status">
+
+                <span id="status-dot"></span>
+
+                <span id="system-status">
+                    Kontrol ediliyor...
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- İSTATİSTİKLER -->
+
+        <section class="stats">
+
+            <div class="card">
+
+                <div class="card-icon">
+                    📷
+                </div>
+
+                <div>
+
+                    <h3>Toplam Kamera</h3>
+
+                    <strong id="camera-count">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🟢
+                </div>
+
+                <div>
+
+                    <h3>Bağlı Kamera</h3>
+
+                    <strong id="connected-camera-count">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🖼️
+                </div>
+
+                <div>
+
+                    <h3>Toplam Fotoğraf</h3>
+
+                    <strong id="image-count">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    ⏱️
+                </div>
+
+                <div>
+
+                    <h3>Otomatik Çekim</h3>
+
+                    <strong id="auto-capture-status">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ALT BÖLÜM -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- SON FOTOĞRAF -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>Son Fotoğraf</h2>
+
+                </div>
+
+                <div
+                    id="last-photo"
+                    class="last-photo"
+                >
+
+                    Fotoğraf bilgisi yükleniyor...
+
+                </div>
+
+            </div>
+
+
+            <!-- KAMERALAR -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <h2>Kamera Durumu</h2>
+
+                </div>
+
+                <div
+                    id="camera-list"
+                    class="camera-list"
+                >
+
+                    Kameralar yükleniyor...
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
