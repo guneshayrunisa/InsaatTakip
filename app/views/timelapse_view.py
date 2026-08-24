@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 
 from PySide6.QtCore import Qt
 
+
 class TimelapseView(QWidget):
 
     def __init__(self):
@@ -73,7 +74,7 @@ class TimelapseView(QWidget):
         )
 
         info = QLabel(
-            "images/ klasöründeki fotoğraflar "
+            "Seçilen kameranın fotoğrafları "
             "kullanılarak video oluşturulur."
         )
 
@@ -88,6 +89,28 @@ class TimelapseView(QWidget):
         # --------------------------------------------------
 
         settings = QHBoxLayout()
+
+        # --------------------------------------------------
+        # KAMERA SEÇİMİ
+        # --------------------------------------------------
+
+        camera_label = QLabel(
+            "Kamera:"
+        )
+
+        self.camera_combo = QComboBox()
+
+        settings.addWidget(
+            camera_label
+        )
+
+        settings.addWidget(
+            self.camera_combo
+        )
+
+        # --------------------------------------------------
+        # FPS SEÇİMİ
+        # --------------------------------------------------
 
         fps_label = QLabel(
             "Video hızı:"
@@ -124,6 +147,10 @@ class TimelapseView(QWidget):
         )
 
         settings.addStretch()
+
+        # --------------------------------------------------
+        # TIME-LAPSE OLUŞTUR BUTONU
+        # --------------------------------------------------
 
         self.create_button = QPushButton(
             "▶  Time-lapse Oluştur"
@@ -170,3 +197,58 @@ class TimelapseView(QWidget):
         )
 
         layout.addStretch()
+
+    # ==================================================
+    # KAMERA LİSTESİNİ GÜNCELLE
+    # ==================================================
+
+    def set_camera_options(
+        self,
+        camera_ids
+    ):
+
+        current_camera = (
+            self.camera_combo.currentData()
+        )
+
+        self.camera_combo.clear()
+
+        for camera_id in camera_ids:
+
+            self.camera_combo.addItem(
+                f"Kamera {camera_id}",
+                camera_id
+            )
+
+        # Önceki seçim hâlâ mevcutsa onu koru
+        if current_camera in camera_ids:
+
+            index = (
+                self.camera_combo.findData(
+                    current_camera
+                )
+            )
+
+            if index >= 0:
+
+                self.camera_combo.setCurrentIndex(
+                    index
+                )
+
+        # Hiç kamera yoksa
+        if not camera_ids:
+
+            self.camera_combo.addItem(
+                "Kamera bulunamadı",
+                None
+            )
+
+    # ==================================================
+    # SEÇİLİ KAMERA
+    # ==================================================
+
+    def get_selected_camera_id(self):
+
+        return (
+            self.camera_combo.currentData()
+        )

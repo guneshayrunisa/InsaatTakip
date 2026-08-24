@@ -25,6 +25,18 @@ class ProjectModel:
 
         self.auto_capture_time = None
 
+        self.auto_capture_camera_id = None
+
+        self.auto_capture_interval_value = None
+
+        self.auto_capture_interval_unit = None
+
+        # ==================================================
+        # OTOMATİK ÇEKİM AYARLARINI DATABASE'DEN YÜKLE
+        # ==================================================
+
+        self.load_auto_capture_settings()
+
         # ==================================================
         # FOTOĞRAF BİLGİLERİ
         # ==================================================
@@ -56,6 +68,68 @@ class ProjectModel:
         # ==================================================
 
         self.timelapse_count = 0
+
+    # ==================================================
+    # OTOMATİK ÇEKİM AYARLARINI YÜKLE
+    # ==================================================
+
+    def load_auto_capture_settings(self):
+
+        settings = (
+            self.database
+            .get_auto_capture_settings()
+        )
+
+        self.auto_capture_enabled = (
+            settings["enabled"]
+        )
+
+        self.auto_capture_camera_id = (
+            settings["camera_id"]
+        )
+
+        self.auto_capture_time = (
+            settings["start_time"]
+        )
+
+        self.auto_capture_interval_value = (
+            settings["interval_value"]
+        )
+
+        self.auto_capture_interval_unit = (
+            settings["interval_unit"]
+        )
+
+    # ==================================================
+    # OTOMATİK ÇEKİM AYARLARINI KAYDET
+    # ==================================================
+
+    def save_auto_capture_settings(
+        self
+    ):
+
+        self.database.save_auto_capture_settings(
+
+            enabled=(
+                self.auto_capture_enabled
+            ),
+
+            camera_id=(
+                self.auto_capture_camera_id
+            ),
+
+            start_time=(
+                self.auto_capture_time
+            ),
+
+            interval_value=(
+                self.auto_capture_interval_value
+            ),
+
+            interval_unit=(
+                self.auto_capture_interval_unit
+            )
+        )
 
     # ==================================================
     # FOTOĞRAF EKLE

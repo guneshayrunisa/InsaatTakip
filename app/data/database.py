@@ -157,6 +157,54 @@ class Database:
             )
         """)
 
+        # ==================================================
+        # OTOMATİK ÇEKİM AYARLARI
+        # ==================================================
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS auto_capture_settings (
+
+                id INTEGER PRIMARY KEY,
+
+                enabled INTEGER NOT NULL DEFAULT 0,
+
+                camera_id INTEGER,
+
+                start_time TEXT,
+
+                interval_value INTEGER,
+
+                interval_unit TEXT,
+
+                FOREIGN KEY (camera_id)
+                    REFERENCES cameras(id)
+
+            )
+        """)
+
+        # ==================================================
+        # VARSAYILAN OTOMATİK ÇEKİM KAYDI
+        # ==================================================
+
+        cursor.execute("""
+            INSERT OR IGNORE INTO auto_capture_settings (
+                id,
+                enabled,
+                camera_id,
+                start_time,
+                interval_value,
+                interval_unit
+            )
+            VALUES (
+                1,
+                0,
+                NULL,
+                NULL,
+                NULL,
+                NULL
+            )
+        """)
+
         connection.commit()
 
         connection.close()
@@ -335,3 +383,97 @@ class Database:
         connection.close()
 
         return cameras
+
+    # ==================================================
+    # OTOMATİK ÇEKİM AYARLARINI KAYDET
+    # ==================================================
+
+    def save_auto_capture_settings(
+        self,
+        enabled,
+        camera_id=None,
+        start_time=None,
+        interval_value=None,
+        interval_unit=None
+    ):
+
+        connection = self.get_connection()
+
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            UPDATE auto_capture_settings
+            SET
+                enabled = ?,
+                camera_id = ?,
+                start_time = ?,
+                interval_value = ?,
+                interval_unit = ?
+            WHERE id = 1
+            """,
+            (
+                1 if enabled else 0,
+                camera_id,
+                start_time,
+                interval_value,
+                interval_unit
+            )
+        )
+
+        connection.commit()
+
+        connection.close()
+
+    # ==================================================
+    # OTOMATİK ÇEKİM AYARLARINI GETİR
+    # ==================================================
+
+    def get_auto_capture_settings(self):
+
+        connection = self.get_connection()
+
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                enabled,
+                camera_id,
+                start_time,
+                interval_value,
+                interval_unit
+            FROM auto_capture_settings
+            WHERE id = 1
+        """)
+
+        settings = cursor.fetchone()
+
+        connection.close()
+
+        if settings is None:
+
+            return {
+                "enabled": False,
+                "camera_id": None,
+                "start_time": None,
+                "interval_value": None,
+                "interval_unit": None
+            }
+
+        return {
+            "enabled": bool(
+                settings["enabled"]
+            ),
+
+            "camera_id":
+                settings["camera_id"],
+
+            "start_time":
+                settings["start_time"],
+
+            "interval_value":
+                settings["interval_value"],
+
+            "interval_unit":
+                settings["interval_unit"]
+        }

@@ -8,49 +8,152 @@ class TimelapseService:
 
     def __init__(self):
 
-        self.project_root = Path(__file__).resolve().parents[2]
+        # ==================================================
+        # PROJE KLASÖRÜ
+        # ==================================================
 
-        self.image_dir = self.project_root / "images"
-        self.video_dir = self.project_root / "videos"
+        self.project_root = (
+            Path(__file__).resolve().parents[2]
+        )
 
-        self.image_dir.mkdir(exist_ok=True)
-        self.video_dir.mkdir(exist_ok=True)
+        # ==================================================
+        # ANA KLASÖRLER
+        # ==================================================
+
+        self.image_dir = (
+            self.project_root / "images"
+        )
+
+        self.video_dir = (
+            self.project_root / "videos"
+        )
+
+        self.image_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        self.video_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+    # ==================================================
+    # KAMERA FOTOĞRAF KLASÖRÜ
+    # ==================================================
+
+    def get_camera_image_dir(
+        self,
+        camera_id
+    ):
+
+        camera_dir = (
+            self.image_dir
+            / f"camera_{camera_id}"
+        )
+
+        camera_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        return camera_dir
+
+    # ==================================================
+    # KAMERA VİDEO KLASÖRÜ
+    # ==================================================
+
+    def get_camera_video_dir(
+        self,
+        camera_id
+    ):
+
+        camera_dir = (
+            self.video_dir
+            / f"camera_{camera_id}"
+        )
+
+        camera_dir.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        return camera_dir
 
     # ==================================================
     # TIME-LAPSE OLUŞTUR
     # ==================================================
 
-    def create_timelapse(self, fps=2):
+    def create_timelapse(
+        self,
+        camera_id=0,
+        fps=2
+    ):
 
-        images = sorted(
-            self.image_dir.glob("*.jpg")
+        # ==================================================
+        # KAMERANIN FOTOĞRAFLARINI AL
+        # ==================================================
+
+        image_dir = (
+            self.get_camera_image_dir(
+                camera_id
+            )
         )
 
+        images = sorted(
+            image_dir.glob("*.jpg")
+        )
+
+        # En az 2 fotoğraf gerekli
         if len(images) < 2:
+
             return None
 
-        # İlk görüntüyü oku
+        # ==================================================
+        # İLK GÖRÜNTÜYÜ OKU
+        # ==================================================
+
         first_image = cv2.imread(
             str(images[0])
         )
 
         if first_image is None:
+
             return None
 
-        height, width = first_image.shape[:2]
+        height, width = (
+            first_image.shape[:2]
+        )
 
-        timestamp = datetime.now().strftime(
-            "%Y-%m-%d_%H-%M-%S"
+        # ==================================================
+        # VİDEO DOSYA YOLU
+        # ==================================================
+
+        timestamp = (
+            datetime.now().strftime(
+                "%Y-%m-%d_%H-%M-%S"
+            )
+        )
+
+        video_dir = (
+            self.get_camera_video_dir(
+                camera_id
+            )
         )
 
         video_path = (
-            self.video_dir /
-            f"timelapse_{timestamp}.mp4"
+            video_dir
+            / f"timelapse_cam{camera_id}_{timestamp}.mp4"
         )
 
-        # MP4 codec
-        fourcc = cv2.VideoWriter_fourcc(
-            *"mp4v"
+        # ==================================================
+        # MP4 CODEC
+        # ==================================================
+
+        fourcc = (
+            cv2.VideoWriter_fourcc(
+                *"mp4v"
+            )
         )
 
         video = cv2.VideoWriter(
@@ -61,9 +164,13 @@ class TimelapseService:
         )
 
         if not video.isOpened():
+
             return None
 
-        # Fotoğrafları videoya ekle
+        # ==================================================
+        # FOTOĞRAFLARI VİDEOYA EKLE
+        # ==================================================
+
         for image_path in images:
 
             frame = cv2.imread(
@@ -71,28 +178,88 @@ class TimelapseService:
             )
 
             if frame is None:
+
                 continue
 
             # Boyutlar farklıysa düzelt
-            frame = cv2.resize(
-                frame,
-                (width, height)
+            if (
+                frame.shape[1] != width
+                or frame.shape[0] != height
+            ):
+
+                frame = cv2.resize(
+                    frame,
+                    (width, height)
+                )
+
+            video.write(
+                frame
             )
 
-            video.write(frame)
+        # ==================================================
+        # VİDEOYU KAPAT
+        # ==================================================
 
         video.release()
 
-        return str(video_path)
+        # Dosyanın gerçekten oluşturulduğunu kontrol et
+        if not video_path.exists():
+
+            return None
+
+        return str(
+            video_path
+        )
 
     # ==================================================
     # VİDEO SAYISI
     # ==================================================
 
-    def get_video_count(self):
+    def get_video_count(
+        self,
+        camera_id=None
+    ):
 
-        return len(
-            list(
-                self.video_dir.glob("*.mp4")
+        # ==================================================
+        # BELİRLİ KAMERA
+        # ==================================================
+
+        if camera_id is not None:
+
+            video_dir = (
+                self.get_camera_video_dir(
+                    camera_id
+                )
+            )
+
+            return len(
+                list(
+                    video_dir.glob("*.mp4")
+                )
+            )
+
+        # ==================================================
+        # TÜM KAMERALAR
+        # ==================================================
+
+        total = 0
+
+        camera_dirs = (
+            self.video_dir.glob(
+                "camera_*"
             )
         )
+
+        for camera_dir in camera_dirs:
+
+            if not camera_dir.is_dir():
+
+                continue
+
+            total += len(
+                list(
+                    camera_dir.glob("*.mp4")
+                )
+            )
+
+        return total

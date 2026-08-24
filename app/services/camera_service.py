@@ -154,15 +154,32 @@ class CameraService:
 
     def check_connection(self):
 
-        if self.camera is not None:
-
-            self.connected = True
-
-        else:
+        if self.camera is None:
 
             self.connected = False
 
-        return self.connected
+            return False
+
+        try:
+
+            # Kameranın gerçekten cevap verip
+            # vermediğini kontrol et.
+            self.camera.capture_metadata()
+
+            self.connected = True
+
+            return True
+
+        except Exception as error:
+
+            print(
+                f"Kamera {self.camera_id} "
+                f"bağlantı kontrolü başarısız: {error}"
+            )
+
+            self.connected = False
+
+            return False
 
     # ==================================================
     # FOTOĞRAF ÇEK

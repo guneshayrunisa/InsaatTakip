@@ -7,15 +7,21 @@ from PySide6.QtWidgets import (
     QFrame,
     QSpacerItem,
     QSizePolicy,
+    QComboBox,
 )
 
 
 class CameraView(QWidget):
 
     def __init__(self):
+
         super().__init__()
 
         self.setup_ui()
+
+    # ==========================================
+    # ARAYÜZ
+    # ==========================================
 
     def setup_ui(self):
 
@@ -34,15 +40,22 @@ class CameraView(QWidget):
         # BAŞLIK
         # ==========================================
 
-        title = QLabel("Kamera")
-        title.setObjectName("page_title")
+        title = QLabel(
+            "Kamera"
+        )
+
+        title.setObjectName(
+            "page_title"
+        )
 
         subtitle = QLabel(
             "Raspberry Pi kamera bağlantısını "
             "ve çekimleri yönetin."
         )
 
-        subtitle.setObjectName("page_subtitle")
+        subtitle.setObjectName(
+            "page_subtitle"
+        )
 
         layout.addWidget(title)
         layout.addWidget(subtitle)
@@ -52,13 +65,19 @@ class CameraView(QWidget):
         # ==========================================
 
         status_card = QFrame()
-        status_card.setObjectName("card")
+
+        status_card.setObjectName(
+            "card"
+        )
 
         status_layout = QHBoxLayout(
             status_card
         )
 
-        camera_icon = QLabel("📷")
+        camera_icon = QLabel(
+            "📷"
+        )
+
         camera_icon.setObjectName(
             "large_icon"
         )
@@ -81,13 +100,21 @@ class CameraView(QWidget):
             "camera_status"
         )
 
-        information.addWidget(camera_title)
+        information.addWidget(
+            camera_title
+        )
+
         information.addWidget(
             self.connection_status
         )
 
-        status_layout.addWidget(camera_icon)
-        status_layout.addLayout(information)
+        status_layout.addWidget(
+            camera_icon
+        )
+
+        status_layout.addLayout(
+            information
+        )
 
         status_layout.addItem(
             QSpacerItem(
@@ -114,14 +141,61 @@ class CameraView(QWidget):
             self.check_connection_button
         )
 
-        layout.addWidget(status_card)
+        layout.addWidget(
+            status_card
+        )
+
+        # ==========================================
+        # KAMERA SEÇİMİ
+        # ==========================================
+
+        camera_selection = QFrame()
+
+        camera_selection.setObjectName(
+            "card"
+        )
+
+        camera_selection_layout = QHBoxLayout(
+            camera_selection
+        )
+
+        camera_selection_label = QLabel(
+            "Çekim yapılacak kamera:"
+        )
+
+        camera_selection_label.setObjectName(
+            "info_label"
+        )
+
+        self.camera_combo = QComboBox()
+
+        self.camera_combo.setMinimumWidth(
+            180
+        )
+
+        camera_selection_layout.addWidget(
+            camera_selection_label
+        )
+
+        camera_selection_layout.addWidget(
+            self.camera_combo
+        )
+
+        camera_selection_layout.addStretch()
+
+        layout.addWidget(
+            camera_selection
+        )
 
         # ==========================================
         # KAMERA ÖNİZLEME
         # ==========================================
 
         preview_card = QFrame()
-        preview_card.setObjectName("card")
+
+        preview_card.setObjectName(
+            "card"
+        )
 
         preview_layout = QVBoxLayout(
             preview_card
@@ -148,13 +222,17 @@ class CameraView(QWidget):
             "camera_preview"
         )
 
-        self.preview.setMinimumHeight(300)
+        self.preview.setMinimumHeight(
+            300
+        )
 
         preview_layout.addWidget(
             self.preview
         )
 
-        layout.addWidget(preview_card)
+        layout.addWidget(
+            preview_card
+        )
 
         # ==========================================
         # BUTONLAR
@@ -170,7 +248,9 @@ class CameraView(QWidget):
             "primary_button"
         )
 
-        self.capture_button.setMinimumHeight(48)
+        self.capture_button.setMinimumHeight(
+            48
+        )
 
         self.auto_capture_button = QPushButton(
             "⏱  Otomatik Çekimi Ayarla"
@@ -192,7 +272,9 @@ class CameraView(QWidget):
             self.auto_capture_button
         )
 
-        layout.addLayout(buttons)
+        layout.addLayout(
+            buttons
+        )
 
         # ==========================================
         # BİLGİ
@@ -203,8 +285,79 @@ class CameraView(QWidget):
             "kaydedilecektir."
         )
 
-        info.setObjectName("footer")
+        info.setObjectName(
+            "footer"
+        )
 
-        layout.addWidget(info)
+        layout.addWidget(
+            info
+        )
 
         layout.addStretch()
+
+    # ==========================================
+    # KAMERA LİSTESİNİ GÜNCELLE
+    # ==========================================
+
+    def set_camera_options(
+        self,
+        camera_ids
+    ):
+
+        current_camera = (
+            self.camera_combo.currentData()
+        )
+
+        self.camera_combo.blockSignals(
+            True
+        )
+
+        self.camera_combo.clear()
+
+        for camera_id in camera_ids:
+
+            self.camera_combo.addItem(
+                f"Kamera {camera_id}",
+                camera_id
+            )
+
+        if current_camera in camera_ids:
+
+            index = (
+                self.camera_combo.findData(
+                    current_camera
+                )
+            )
+
+            if index >= 0:
+
+                self.camera_combo.setCurrentIndex(
+                    index
+                )
+
+        elif camera_ids:
+
+            self.camera_combo.setCurrentIndex(
+                0
+            )
+
+        else:
+
+            self.camera_combo.addItem(
+                "Kamera bulunamadı",
+                None
+            )
+
+        self.camera_combo.blockSignals(
+            False
+        )
+
+    # ==========================================
+    # SEÇİLİ KAMERA
+    # ==========================================
+
+    def get_selected_camera_id(self):
+
+        return (
+            self.camera_combo.currentData()
+        )

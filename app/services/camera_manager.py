@@ -5,8 +5,7 @@ class CameraManager:
 
     def __init__(
         self,
-        camera_count=2,
-        existing_camera=None
+        camera_count=2
     ):
 
         self.camera_count = camera_count
@@ -19,21 +18,7 @@ class CameraManager:
         )
 
         # ==================================================
-        # MEVCUT KAMERA
-        # ==================================================
-
-        if existing_camera is not None:
-
-            if existing_camera.check_connection():
-
-                self.cameras[0] = existing_camera
-
-                print(
-                    "Mevcut kamera Kamera 0 olarak kullanılıyor."
-                )
-
-        # ==================================================
-        # DİĞER KAMERALARI BAŞLAT
+        # KAMERALARI BAŞLAT
         # ==================================================
 
         self.initialize_cameras()
@@ -44,11 +29,7 @@ class CameraManager:
 
     def initialize_cameras(self):
 
-        # Kamera 0 zaten mevcutsa tekrar başlatma.
-        # 1'den başlayarak diğer kameraları dene.
-
         for camera_id in range(
-            1,
             self.camera_count
         ):
 
@@ -94,6 +75,112 @@ class CameraManager:
         return list(
             self.cameras.keys()
         )
+
+    # ==================================================
+    # KAMERALARIN GERÇEK BAĞLANTI DURUMUNU KONTROL ET
+    # ==================================================
+
+    def refresh_connections(self):
+
+        disconnected_cameras = []
+
+        # ==================================================
+        # MEVCUT KAMERALARI KONTROL ET
+        # ==================================================
+
+        for camera_id, camera in list(
+            self.cameras.items()
+        ):
+
+            try:
+
+                if not camera.check_connection():
+
+                    print(
+                        f"Kamera {camera_id} "
+                        "bağlantısı kesildi."
+                    )
+
+                    camera.close()
+
+                    disconnected_cameras.append(
+                        camera_id
+                    )
+
+            except Exception as error:
+
+                print(
+                    f"Kamera {camera_id} "
+                    f"kontrol hatası: {error}"
+                )
+
+                try:
+
+                    camera.close()
+
+                except Exception:
+
+                    pass
+
+                disconnected_cameras.append(
+                    camera_id
+                )
+
+        # ==================================================
+        # BAĞLANTISI KESİLENLERİ SİL
+        # ==================================================
+
+        for camera_id in disconnected_cameras:
+
+            self.cameras.pop(
+                camera_id,
+                None
+            )
+
+        # ==================================================
+        # EKSİK KAMERALARI YENİDEN ARA
+        # ==================================================
+
+        for camera_id in range(
+            self.camera_count
+        ):
+
+            if camera_id in self.cameras:
+
+                continue
+
+            try:
+
+                print(
+                    f"Kamera {camera_id} "
+                    "yeniden aranıyor..."
+                )
+
+                camera = CameraService(
+                    camera_id=camera_id
+                )
+
+                if camera.check_connection():
+
+                    self.cameras[camera_id] = camera
+
+                    print(
+                        f"Kamera {camera_id} "
+                        "yeniden bağlandı."
+                    )
+
+                else:
+
+                    camera.close()
+
+            except Exception as error:
+
+                print(
+                    f"Kamera {camera_id} "
+                    f"yeniden bağlanamadı: {error}"
+                )
+
+        return self.get_connected_cameras()
 
     # ==================================================
     # KAMERA GETİR

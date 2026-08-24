@@ -118,18 +118,6 @@ class GalleryView(QWidget):
             150
         )
 
-        # Kamera 0
-        self.camera_combo.addItem(
-            "Kamera 0",
-            0
-        )
-
-        # Kamera 1
-        self.camera_combo.addItem(
-            "Kamera 1",
-            1
-        )
-
         self.camera_combo.currentIndexChanged.connect(
             self.camera_changed
         )
@@ -208,6 +196,113 @@ class GalleryView(QWidget):
     # ==================================================
     # KAMERA DEĞİŞTİR
     # ==================================================
+    # ==================================================
+# KAMERA LİSTESİNİ GÜNCELLE
+# ==================================================
+
+    def set_camera_options(
+        self,
+        camera_ids
+    ):
+
+        current_camera = (
+            self.camera_combo.currentData()
+        )
+
+        self.camera_combo.blockSignals(
+            True
+        )
+
+        self.camera_combo.clear()
+
+        for camera_id in camera_ids:
+
+            self.camera_combo.addItem(
+                f"Kamera {camera_id}",
+                camera_id
+            )
+
+        # Önceki seçim hâlâ mevcutsa onu koru
+        if current_camera in camera_ids:
+
+            index = (
+                self.camera_combo.findData(
+                    current_camera
+                )
+            )
+
+            if index >= 0:
+
+                self.camera_combo.setCurrentIndex(
+                    index
+                )
+
+        # Hiç kamera yoksa
+        if not camera_ids:
+
+            self.camera_combo.addItem(
+                "Kamera bulunamadı",
+                None
+            )
+
+        self.camera_combo.blockSignals(
+            False
+        )
+
+        # İlk kamerayı varsayılan olarak seç
+        if camera_ids:
+
+            if current_camera not in camera_ids:
+
+                self.camera_combo.setCurrentIndex(
+                    0
+                )
+
+                self.selected_camera = (
+                    camera_ids[0]
+                )
+
+    # ==================================================
+# KAYITLI KAMERALARI BUL
+# ==================================================
+
+    def get_available_camera_ids(self):
+
+        camera_ids = []
+
+        if not self.image_dir.exists():
+            return camera_ids
+
+        for camera_dir in self.image_dir.glob(
+            "camera_*"
+        ):
+
+            if not camera_dir.is_dir():
+                continue
+
+            try:
+
+                camera_id = int(
+                    camera_dir.name.split("_")[1]
+                )
+
+            except (IndexError, ValueError):
+
+                continue
+
+            images = list(
+                camera_dir.glob("*.jpg")
+            )
+
+            if images:
+
+                camera_ids.append(
+                    camera_id
+                )
+
+        return sorted(
+            camera_ids
+        )
 
     def camera_changed(
         self,
@@ -218,6 +313,10 @@ class GalleryView(QWidget):
             self.camera_combo
             .itemData(index)
         )
+
+        if camera_id is None:
+
+            return
 
         self.selected_camera = (
             camera_id
